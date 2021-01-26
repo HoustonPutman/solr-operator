@@ -1,13 +1,12 @@
-
 apiVersion: v1
 name: solr-operator
 description: The Solr Operator enables easy management of Solr resources within Kubernetes.
 version: 0.2.8
 appVersion: v0.2.8
 kubeVersion: ">= 1.16.0-0"
-home: https://github.com/bloomberg/solr-operator
+home: https://github.com/apache/lucene-solr-operator
 sources:
-  - https://github.com/bloomberg/solr-operator
+  - https://github.com/apache/lucene-solr-operator
 keywords:
   - solr
   - apache
@@ -15,8 +14,70 @@ keywords:
   - lucene
   - operator
 maintainers:
+  - name: Solr Dev Community
+    email: dev@lucene.apache.org
   - name: Houston Putman
     email: houston@apache.org
-  - name: Balaji Sankaranarayanan
-    email: bsankaranara@bloomberg.net
 icon: https://lucene.apache.org/theme/images/solr/identity/Solr_Logo_on_white.png
+annotations:
+  artifacthub.io/operator: "true"
+  artifacthub.io/operatorCapabilities: Seamless Upgrades
+  artifacthub.io/prerelease: "false"
+  artifacthub.io/images: |
+    - name: solr-operator
+      image: bloomberg/solr-operator:v0.2.8
+  artifacthub.io/crds: |
+    - kind: SolrCloud
+      version: v1beta1
+      name: solrcloud.solr.bloomberg.com
+      displayName: Solr Cloud
+      description: A distributed Solr Cloud cluster
+    - kind: SolrPrometheusExporter
+      version: v1beta1
+      name: solrprometheusexporter.solr.bloomberg.com
+      displayName: Solr Prometheus Exporter
+      description: A Prometheus metrics exporter for Solr
+    - kind: SolrBackup
+      version: v1beta1
+      name: solrbackup.solr.bloomberg.com
+      displayName: Solr Backup
+      description: A backup mechanism for Solr
+  artifacthub.io/crdsExamples: |
+    - apiVersion: solr.bloomberg.com/v1beta1
+      kind: SolrCloud
+      metadata:
+        name: example
+      spec:
+        dataStorage:
+          persistent:
+            reclaimPolicy: Delete
+            pvcTemplate:
+              spec:
+                resources:
+                  requests:
+                    storage: "20Gi"
+        replicas: 3
+        solrImage:
+          tag: 8.7.0
+        solrJavaMem: "-Xms4g -Xmx4g"
+        customSolrKubeOptions:
+          podOptions:
+            resources:
+              requests:
+                memory: "6G"
+        zookeeperRef:
+          provided:
+            replicas: 3
+        solrOpts: "-Dsolr.autoSoftCommit.maxTime=10000"
+        solrGCTune: "-XX:SurvivorRatio=4 -XX:TargetSurvivorRatio=90 -XX:MaxTenuringThreshold=8"
+    - apiVersion: solr.bloomberg.com/v1beta1
+      kind: SolrPrometheusExporter
+      metadata:
+        name: example
+      spec:
+        solrReference:
+          cloud:
+            name: "example"
+        numThreads: 4
+        image:
+          tag: 8.7.0
