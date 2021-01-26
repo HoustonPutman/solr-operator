@@ -3,7 +3,7 @@ Solr Operator
 
 The Solr Operator is designed to allow easy deployment Solr Clouds and other Solr Resources to Kubernetes.
 
-Documentation around using the Solr Operator can be found in it's [source repo](https://github.com/bloomberg/solr-operator).
+Documentation around using the Solr Operator can be found in it's [source repo](https://github.com/apache/lucene-solr-operator).
 
 ## Using the Helm Chart
 
@@ -14,12 +14,12 @@ This is because the Solr Operator, in most instances, relies on the Zookeeper Op
 
 If you are setting `useZkOperator=false`, then please disregard this section.
 
-Eventually the Zookeeper Opertor will be a dependency on the Solr Operator helm chart, but for now there are two easy ways to deploy it.
+Eventually the Zookeeper Operator will be a dependency on the Solr Operator helm chart, but for now there are two easy ways to deploy it.
 
 - A helm chart is available [in the Zookeeper Operator repository](https://github.com/pravega/zookeeper-operator/blob/master/charts/zookeeper-operator/).
 - Use the following kubectl command:
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/bloomberg/solr-operator/master/example/dependencies/zk_operator.yaml
+kubectl apply -f https://apache.github.io/lucene-solr-operator/example/dependencies/zk_operator.yaml
 ```
 
 #### Helm
@@ -27,14 +27,14 @@ kubectl apply -f https://raw.githubusercontent.com/bloomberg/solr-operator/maste
 Eventually this will be a dependency on the helm chart, but for now we can run an easy `kubectl apply`.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/bloomberg/solr-operator/master/example/dependencies/zk_operator.yaml
+kubectl apply -f https://apache.github.io/lucene-solr-operator/example/dependencies/zk_operator.yaml
 ```
 
 ### Adding the Solr Operator Helm Chart Repository
 You should only need to add the solr operator helm chart repository once, by running the following command:
 
 ```console
-$ helm repo add solr-operator https://bloomberg.github.io/solr-operator/charts
+$ helm repo add apache-solr https://apache.github.io/lucene-solr-operator/charts
 ```
 
 ### Installing the Chart
@@ -42,8 +42,8 @@ $ helm repo add solr-operator https://bloomberg.github.io/solr-operator/charts
 To install the Solr Operator with the latest version or with a specific version, run either of the following commands:
 
 ```console
-$ helm install solr-operator solr-operator/solr-operator
-$ helm install solr-operator solr-operator/solr-operator --version 0.2.5
+$ helm install solr-operator apache-solr/solr-operator
+$ helm install solr-operator apache-solr/solr-operator --version 0.2.6
 ```
 
 The command deploys the solr-operator on the Kubernetes cluster with the default configuration.
@@ -55,21 +55,21 @@ If you want to specify the namespace for the installation, use the `--namespace`
 All resources will be deployed to the given namespace.
 
 ```console
-$ helm install solr-operator solr-operator/solr-operator --namespace solr
+$ helm install solr-operator apache-solr/solr-operator --namespace solr
 ```
 
 If you want to only watch that namespace, or others, then you will have to provide the `watchNamespaces` option.
 
 ```console
 // Watch the namespace where the operator is deployed to (just pass the boolean true)
-$ helm install solr-operator solr-operator/solr-operator --namespace solr --set watchNamespaces=true
+$ helm install solr-operator apache-solr/solr-operator --namespace solr --set watchNamespaces=true
 // Watch a single namespace different than the one being deployed to
-$ helm install solr-operator solr-operator/solr-operator --namespace solr --set watchNamespaces=other
+$ helm install solr-operator apache-solr/solr-operator --namespace solr --set watchNamespaces=other
 // Watch multiple namespaces (commmas must be escaped in the set string)
-$ helm install solr-operator solr-operator/solr-operator --namespace solr --set watchNamespaces="team1\,team2\,team3"
+$ helm install solr-operator apache-solr/solr-operator --namespace solr --set watchNamespaces="team1\,team2\,team3"
 ```
 
-Note: Passing `false` and `""` to the `watchNamespaces` variable will both result in the operator watchting all namespaces in the Kube cluster.
+Note: Passing `false` or `""` to the `watchNamespaces` variable will both result in the operator watchting all namespaces in the Kube cluster.
 
 ### Managing CRDs
 
@@ -81,7 +81,7 @@ If have solr operator installations in multiple namespaces that are managed sepa
 This can be done with the `--skip-crds` helm option.
 
 ```console
-$ helm install solr-operator solr-operator/solr-operator --skip-crds --namespace solr
+$ helm install solr-operator apache-solr/solr-operator --skip-crds --namespace solr
 ```
 
 #### Helm 2
@@ -91,7 +91,7 @@ If you are using Helm 2, CRDs are installed using the crd-install hook. Prior to
 You will also need to update the install command to use the name flag, as shown below.
 
 ```console
-$ helm install --name solr-operator solr-operator/solr-operator
+$ helm install --name solr-operator apache-solr/solr-operator
 ```
 
 ### Uninstalling the Chart
