@@ -81,3 +81,7 @@ annotations:
         numThreads: 4
         image:
           tag: 8.7.0
+  artifacthub.io/changes: |
+    - This will be the last release of the Bloomberg Solr Operator.
+      All new versions will be release from the Apache organization.
+    - Fixing upgrade issue with new Status fields
