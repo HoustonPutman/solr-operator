@@ -72,3 +72,9 @@ annotations:
         numThreads: 4
         image:
           tag: 8.7.0
+  artifacthub.io/changes: |
+    - Helm chart fixes and improvements
+    - Adding namespace functionality to operator and helm chart
+    - Adding custom addressability options to solrcloud
+    - Adding configurable liveness, readiness, startup checks
+    - Documentation improvements
