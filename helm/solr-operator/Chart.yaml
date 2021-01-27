@@ -82,54 +82,43 @@ annotations:
         image:
           tag: 8.7.0
   artifacthub.io/changes: |
-    - Upgrade Notes and Compatibility
-      - Kubernetes 1.16+ is required for for this release of the Solr Operator.
-        Please continue using v0.2.6 until you are able to upgrade your Kubernetes cluster.
-      - Removed Features
-        - Support for etcd/zetcd deployments has been removed.
-      - Deprecations (All deprecations will be removed in v0.3.0)
-        - The section for a Zookeeper cluster Spec "SolrCloud.spec.zookeeperRef.provided.zookeeper" has been DEPRECATED.
-          The same fields (except for the deprecated persistentVolumeClaimSpec option) are now available under "SolrCloud.spec.zookeeperRef.provided".
-        - Data Storage options have been expanded, and moved from their old locations.
-          - "SolrCloud.spec.dataPvcSpec" has been DEPRECATED.
-            Please instead use the following instead: "SolrCloud.spec.dataStorage.persistent.pvcTemplate.spec"
-          - "SolrCloud.spec.backupRestoreVolume" has been DEPRECATED.
-            Please instead use the following instead: "SolrCloud.spec.dataStorage.backupRestoreOptions.Volume"
-      - Changes
-        - The SolrCloud and SolrPrometheusExporter services' portNames have changed to "solr-client" and "solr-metrics" from "ext-solr-client" and "ext-solr-metrics", respectivelyi.
-        - The default PodManagementPolicy for StatefulSets has been changed to Parallel from OrderedReady.
-          This change will not affect existing StatefulSets, as PodManagementPolicy cannot be updated.
-          In order to continue using OrderedReady on new SolrClouds, please use the following setting:
-          "SolrCloud.spec.customSolrKubeOptions.statefulSetOptions.podManagementPolicy"
-        - The location of backup-restore volume mounts in Solr containers has changed from "/var/solr/solr-backup-restore" to "/var/solr/data/backup-restore".
-
-    - New Features
-      - Introducing a managed SolrCloud update strategy
-      - Added PriorityClassName in podOptions
-      - Added option to provide ZK ACLs
-      - Added dataStorage options for SolrCloud
-        - PVC reclaim policy
-        - Ephemeral Volume spec for non-persistent storage
-      - Ability to provide custom solr.xml for SolrCloud
-      - Ability to specify sidecar container and additional initContainers
-
-    - Improvements
-      - Gracefully shutdown Solr nodes using the Solr stop port
-      - Adding scope: Namespaced to all CRDs
-      - Move chroot creation logic to pod postStart and out of operator
-      - Change default SolrCloud podManagementPolicy to Parallel from OrderedReady
-
-    - Bug Fixes
-      - ZKConnectionString now uses all ZK hosts with Provided ZK
-      - Fix service port name and status URL bugs
-      - Fix never-ending reconcile loop for ZKs
-      - Fix never-ending reconcile loop for ingresses in Kube 1.18+
-      - Backups
-        - SolrBackup now works with Solr 8.6+
-        - Fixed an issue with volume permissions in the read-write-many volume
-
-    - Miscellaneous
-      - Upgraded dependencies of the Solr Operator
-      - Remove Etcd support from the Solr Operator
-      - Remove default imagePullPolicy for pods
-      - Upgraded CRD versions to v1, from v1beta1
+    - |
+      Kubernetes 1.16+ is required for for this release of the Solr Operator.
+      Please continue using v0.2.6 until you are able to upgrade your Kubernetes cluster.
+    - Removed support for etcd/zetcd deployments.
+    - Deprecations (All deprecations will be removed in v0.3.0)
+    - |
+      The section for a Zookeeper cluster Spec "SolrCloud.spec.zookeeperRef.provided.zookeeper" has been DEPRECATED.
+      The same fields (except for the deprecated persistentVolumeClaimSpec option) are now available under "SolrCloud.spec.zookeeperRef.provided".
+    - Data Storage options have been expanded, and moved from their old locations.
+    - |
+      "SolrCloud.spec.dataPvcSpec" has been DEPRECATED.
+      Please instead use the following instead: "SolrCloud.spec.dataStorage.persistent.pvcTemplate.spec"
+    - |
+      "SolrCloud.spec.backupRestoreVolume" has been DEPRECATED.
+      Please instead use the following instead: "SolrCloud.spec.dataStorage.backupRestoreOptions.Volume"
+    - The SolrCloud and SolrPrometheusExporter services' portNames have changed to "solr-client" and "solr-metrics" from "ext-solr-client" and "ext-solr-metrics", respectivelyi.
+    - |
+      The default PodManagementPolicy for StatefulSets has been changed to Parallel from OrderedReady.
+      This change will not affect existing StatefulSets, as PodManagementPolicy cannot be updated.
+      In order to continue using OrderedReady on new SolrClouds, please use the following setting:
+      "SolrCloud.spec.customSolrKubeOptions.statefulSetOptions.podManagementPolicy"
+    - The location of backup-restore volume mounts in Solr containers has changed from "/var/solr/solr-backup-restore" to "/var/solr/data/backup-restore".
+    - Introduced a managed SolrCloud update strategy
+    - Added PriorityClassName in podOptions
+    - Added option to provide ZK ACLs
+    - Added dataStorage options for SolrCloud - PVC reclaim policy & Ephemeral Volume spec for non-persistent storage
+    - Ability to provide custom solr.xml for SolrCloud
+    - Ability to specify sidecar container and additional initContainers
+    - Gracefully shutdown Solr nodes using the Solr stop port
+    - Adding scope=Namespaced to all CRDs
+    - Move chroot creation logic to pod postStart and out of operator
+    - Change default SolrCloud podManagementPolicy to Parallel from OrderedReady
+    - ZKConnectionString now uses all ZK hosts with Provided ZK
+    - Fix service port name and status URL bugs
+    - Fix never-ending reconcile loop for ZKs
+    - Fix never-ending reconcile loop for ingresses in Kube 1.18+
+    - SolrBackup now works with Solr 8.6+
+    - Fixed an issue with volume permissions in the read-write-many volume for Backups
+    - Remove default imagePullPolicy for pods
+    - Upgraded CRD versions to v1, from v1beta1
