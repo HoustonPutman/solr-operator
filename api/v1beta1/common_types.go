@@ -106,6 +106,10 @@ type PodOptions struct {
 	// +optional
 	StartupProbe *corev1.Probe `json:"startupProbe,omitempty"`
 
+	// Ports to add to the main container
+	// +optional
+	Ports []corev1.ContainerPort `json:"ports,omitempty"`
+
 	// PriorityClassName for the pod
 	// +optional
 	PriorityClassName string `json:"priorityClassName,omitempty"`

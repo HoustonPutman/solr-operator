@@ -745,4 +745,16 @@ var (
 			ImagePullPolicy:          "Always",
 		},
 	}
+	extraContainerPorts = []corev1.ContainerPort{
+		{
+			Name:          "test-1",
+			ContainerPort: 2313,
+			Protocol:      corev1.ProtocolTCP,
+		},
+		{
+			Name:          "test-2",
+			ContainerPort: 2313,
+			Protocol:      corev1.ProtocolTCP,
+		},
+	}
 )

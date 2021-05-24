@@ -431,19 +431,28 @@ func GenerateStatefulSet(solrCloud *solr.SolrCloud, solrCloudStatus *solr.SolrCl
 	if customPodOptions != nil && len(customPodOptions.InitContainers) > 0 {
 		initContainers = append(initContainers, customPodOptions.InitContainers...)
 	}
+	// Add user defined additional init containers
+	ports := []corev1.ContainerPort{
+		{
+			ContainerPort: int32(solrPodPort),
+			Name:          SolrClientPortName,
+			Protocol:      "TCP",
+		},
+	}
+	if customPodOptions != nil && len(customPodOptions.Ports) > 0 {
+		for _, port := range customPodOptions.Ports {
+			if port.Name != ports[0].Name && port.ContainerPort != ports[0].ContainerPort {
+				ports = append(ports, port)
+			}
+		}
+	}
 
 	containers := []corev1.Container{
 		{
 			Name:            SolrNodeContainer,
 			Image:           solrCloud.Spec.SolrImage.ToImageName(),
 			ImagePullPolicy: solrCloud.Spec.SolrImage.PullPolicy,
-			Ports: []corev1.ContainerPort{
-				{
-					ContainerPort: int32(solrPodPort),
-					Name:          SolrClientPortName,
-					Protocol:      "TCP",
-				},
-			},
+			Ports:           ports,
 			LivenessProbe: &corev1.Probe{
 				InitialDelaySeconds: DefaultLivenessProbeInitialDelaySeconds,
 				TimeoutSeconds:      DefaultLivenessProbeTimeoutSeconds,

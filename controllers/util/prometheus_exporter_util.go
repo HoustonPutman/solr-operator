@@ -193,12 +193,28 @@ func GenerateSolrPrometheusExporterDeployment(solrPrometheusExporter *solr.SolrP
 		envVars = append(envVars, corev1.EnvVar{Name: "JAVA_OPTS", Value: strings.Join(allJavaOpts, " ")})
 	}
 
+	// Add user defined additional init containers
+	ports := []corev1.ContainerPort{
+		{
+			ContainerPort: SolrMetricsPort,
+			Name:          SolrMetricsPortName,
+			Protocol:      corev1.ProtocolTCP,
+		},
+	}
+	if customPodOptions != nil && len(customPodOptions.Ports) > 0 {
+		for _, port := range customPodOptions.Ports {
+			if port.Name != ports[0].Name && port.ContainerPort != ports[0].ContainerPort {
+				ports = append(ports, port)
+			}
+		}
+	}
+
 	containers := []corev1.Container{
 		{
 			Name:            "solr-prometheus-exporter",
 			Image:           solrPrometheusExporter.Spec.Image.ToImageName(),
 			ImagePullPolicy: solrPrometheusExporter.Spec.Image.PullPolicy,
-			Ports:           []corev1.ContainerPort{{ContainerPort: SolrMetricsPort, Name: SolrMetricsPortName, Protocol: corev1.ProtocolTCP}},
+			Ports:           ports,
 			VolumeMounts:    volumeMounts,
 			Command:         []string{entrypoint},
 			Args:            exporterArgs,
