@@ -83,6 +83,12 @@ if [[ "${SOLR_IMAGE}" != *":"* ]]; then
 fi
 IFS=$'\036'; RAW_GINKGO=(${RAW_GINKGO:-}); unset IFS
 
+if [[ -z "${DOCKER_CLI:-}" ]]; then
+  DOCKER_CLI="docker"
+else
+  export KIND_EXPERIMENTAL_PROVIDER="${DOCKER_CLI:-}"
+fi
+
 CLUSTER_NAME="$(echo "solr-op-e2e-${OPERATOR_IMAGE##*:}-k-${KUBERNETES_VERSION}-s-${SOLR_IMAGE##*:}"  | tr '[:upper:]' '[:lower:]' | sed "s/snapshot/snap/" | sed "s/prerelease/pre/")"
 export CLUSTER_NAME
 export KUBE_CONTEXT="kind-${CLUSTER_NAME}"
@@ -91,6 +97,7 @@ export OPERATOR_IMAGE
 export SOLR_IMAGE
 export ADDITIONAL_IMAGES
 export RAW_GINKGO
+export DOCKER_CLI
 
 # Cluster Operation Options
 export REUSE_KIND_CLUSTER_IF_EXISTS="${REUSE_KIND_CLUSTER_IF_EXISTS:-true}" # This is used for all start_cluster calls
@@ -99,13 +106,13 @@ export LEAVE_KIND_CLUSTER_ON_SUCCESS="${LEAVE_KIND_CLUSTER_ON_SUCCESS:-false}" #
 function add_image_to_kind_repo_if_local() {
   IMAGE="$1"
   PULL_IF_NOT_LOCAL="$2"
-  if (docker image inspect "${IMAGE}" &>/dev/null); then
-    printf "\nUsing local version of image \"%s\".\nIf you want to use an updated version of this image, run \"docker pull %s\" before running the integration tests again.\n\n" "${IMAGE}" "${IMAGE}"
+  if (${DOCKER_CLI} image inspect "${IMAGE}" &>/dev/null); then
+    printf "\nUsing local version of image \"%s\".\nIf you want to use an updated version of this image, run \"${DOCKER_CLI} pull %s\" before running the integration tests again.\n\n" "${IMAGE}" "${IMAGE}"
     kind load docker-image --name "${CLUSTER_NAME}" "${IMAGE}"
   else
     if [ "${PULL_IF_NOT_LOCAL}" = true ]; then
       printf "\nPulling image \"%s\" since it was not found locally.\n\n" "${IMAGE}" "${IMAGE}"
-      docker pull "${IMAGE}"
+      ${DOCKER_CLI} pull "${IMAGE}"
       kind load docker-image --name "${CLUSTER_NAME}" "${IMAGE}"
     else
       printf "\nUsing the remote image \"%s\", since it was not found in the local Docker image list.\n\n" "${IMAGE}"

@@ -39,6 +39,7 @@ ARCH = $(shell go env GOARCH)
 # Default some of the testing options
 TEST_PARALLELISM ?= 3
 
+DOCKER_CLI?=docker
 KUSTOMIZE_VERSION=v4.5.2
 CONTROLLER_GEN_VERSION=v0.10.0
 GO_LICENSES_VERSION=v1.5.0
@@ -162,14 +163,14 @@ run: manifests generate fmt vet ## Run a controller from your host
 
 .PHONY: docker-build
 docker-build: ## Build the docker image for the Solr Operator
-	docker build --build-arg GIT_SHA=$(GIT_SHA) . -t solr-operator -f ./build/Dockerfile
-	docker tag solr-operator $(IMG):$(TAG)
-	docker tag solr-operator $(IMG):latest
+	$(DOCKER_CLI) build --build-arg GIT_SHA=$(GIT_SHA) . -t solr-operator -f ./build/Dockerfile
+	$(DOCKER_CLI) tag solr-operator $(IMG):$(TAG)
+	$(DOCKER_CLI) tag solr-operator $(IMG):latest
 
 .PHONY: docker-push
 docker-push: ## Push the docker image for the Solr Operator
-	docker push $(IMG):$(TAG)
-	docker push $(IMG):latest
+	$(DOCKER_CLI) push $(IMG):$(TAG)
+	$(DOCKER_CLI) push $(IMG):latest
 
 ##@ Deployment
 

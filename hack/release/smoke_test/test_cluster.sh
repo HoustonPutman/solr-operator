@@ -82,6 +82,11 @@ fi
 if [[ "${SOLR_IMAGE}" != *":"* ]]; then
   SOLR_IMAGE="solr:${SOLR_IMAGE}"
 fi
+if [[ -z "${DOCKER_CLI:-}" ]]; then
+  DOCKER_CLI="docker"
+else
+  export KIND_EXPERIMENTAL_PROVIDER="${DOCKER_CLI:-}"
+fi
 
 export LOCATION="$LOCATION"
 export VERSION="$VERSION"
@@ -107,7 +112,7 @@ if ! (echo "${LOCATION}" | grep "http"); then
   SOLR_HELM_CHART="${LOCATION}/helm-charts/solr-${VERSION#v}.tgz"
 else
   # If LOCATION is a URL, then we want to make sure we have the up-to-date docker image.
-  docker pull "${IMAGE}"
+  ${DOCKER_CLI} pull "${IMAGE}"
 
   OP_HELM_CHART="apache-solr-test-${VERSION}/solr-operator"
   SOLR_HELM_CHART="apache-solr-test-${VERSION}/solr"
@@ -130,21 +135,21 @@ echo "Create test Kubernetes ${KUBERNETES_VERSION} cluster in Kind. This will al
 kind create cluster --name "${CLUSTER_NAME}" --image "kindest/node:${KUBERNETES_VERSION}"
 
 # Load the docker images into the cluster
-if (docker image inspect "${IMAGE}" &>/dev/null); then
+if (${DOCKER_CLI} image inspect "${IMAGE}" &>/dev/null); then
   kind load docker-image --name "${CLUSTER_NAME}" "${IMAGE}"
-  printf "\nUsing local version of Solr Operator image \"${IMAGE}\".\nIf you want to use an updated version of this image, run \"docker pull ${SOLR_IMAGE}\" before running the smoke test again.\n\n"
+  printf "\nUsing local version of Solr Operator image \"${IMAGE}\".\nIf you want to use an updated version of this image, run \"${DOCKER_CLI} pull ${SOLR_IMAGE}\" before running the smoke test again.\n\n"
 else
   printf "\nUsing the remote Solr Operator image \"${IMAGE}\", since it was not found in the local Docker image list.\n\n"
 fi
-if (docker image inspect "${SOLR_IMAGE}" &>/dev/null); then
+if (${DOCKER_CLI} image inspect "${SOLR_IMAGE}" &>/dev/null); then
   kind load docker-image --name "${CLUSTER_NAME}" "${SOLR_IMAGE}"
-  printf "\nUsing local version of Solr image \"${SOLR_IMAGE}\".\nIf you want to use an updated version of this image, run \"docker pull ${SOLR_IMAGE}\" before running the smoke test again.\n\n"
+  printf "\nUsing local version of Solr image \"${SOLR_IMAGE}\".\nIf you want to use an updated version of this image, run \"${DOCKER_CLI} pull ${SOLR_IMAGE}\" before running the smoke test again.\n\n"
 else
   printf "\nUsing the remote Solr image \"${SOLR_IMAGE}\", since it was not found in the local Docker image list.\n\n"
 fi
 
 # Add a temporary directory for backups
-docker exec "${CLUSTER_NAME}-control-plane" bash -c "mkdir -p /tmp/backup"
+${DOCKER_CLI} exec "${CLUSTER_NAME}-control-plane" bash -c "mkdir -p /tmp/backup"
 
 echo "Import Solr Keys"
 curl -sL0 "https://dist.apache.org/repos/dist/release/solr/KEYS" | gpg --import --quiet

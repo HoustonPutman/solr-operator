@@ -34,6 +34,19 @@ This page details the steps for developing the Solr Operator, and all necessary 
 
 Please follow the instructions from the [local tutorial](local_tutorial.md#setup-docker-for-mac-with-k8s).
 
+#### Alternative Docker CLI
+
+The Solr Operator also supports building & testing with [Podman](https://podman.io/), or any docker-cli-compatible executable you choose.
+To use, just provide `DOCKER_CLI=podman` or the name of the executable when running `make`.
+
+```bash
+make docker-build DOCKER_CLI=podman
+```
+
+This envVar will also be used with `KIND_EXPERIMENTAL_PROVIDER` when running `kind` commands, so ensure that `kind` has that provider available.
+(`docker` and `podman` are built-in options)  
+NOTE: KinD is only used when running integration tests or smoke tests.
+
 ### Install the necessary dependencies
 
 Install the [Zookeeper Operator](https://github.com/pravega/zookeeper-operator), which this operator depends on by default.
@@ -128,7 +141,7 @@ make test
 
 ## Before you create a PR
 
-The github actions will auto-check that linting is successful on your PR.
+The GitHub actions will auto-check that linting is successful on your PR.
 To make sure that the linting will succeed, run the following command before committing.
 
 ```bash
