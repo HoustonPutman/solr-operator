@@ -373,6 +373,12 @@ func GenerateStatefulSet(solrCloud *solr.SolrCloud, solrCloudStatus *solr.SolrCl
 		allSolrOpts = append(allSolrOpts, zkSolrOpt)
 	}
 	envVars = append(envVars, zkEnvVars...)
+	if hasChroot {
+		envVars = append(envVars, corev1.EnvVar{
+			Name:  "ZK_CREATE_CHROOT",
+			Value: "true",
+		})
+	}
 
 	// Add envVars for backupRepos if any are needed
 	if len(backupEnvVars) > 0 {
@@ -380,15 +386,6 @@ func GenerateStatefulSet(solrCloud *solr.SolrCloud, solrCloudStatus *solr.SolrCl
 	}
 
 	// Only have a postStart command to create the chRoot, if it is not '/' (which does not need to be created)
-	var postStart *corev1.LifecycleHandler
-	if hasChroot {
-		postStart = &corev1.LifecycleHandler{
-			Exec: &corev1.ExecAction{
-				Command: []string{"sh", "-c", "solr zk ls ${ZK_CHROOT} -z ${ZK_SERVER} || solr zk mkroot ${ZK_CHROOT} -z ${ZK_SERVER}"},
-			},
-		}
-	}
-
 	// Default preStop hook
 	preStop := &corev1.LifecycleHandler{
 		Exec: &corev1.ExecAction{
@@ -486,8 +483,7 @@ func GenerateStatefulSet(solrCloud *solr.SolrCloud, solrCloudStatus *solr.SolrCl
 			VolumeMounts: volumeMounts,
 			Env:          envVars,
 			Lifecycle: &corev1.Lifecycle{
-				PostStart: postStart,
-				PreStop:   preStop,
+				PreStop: preStop,
 			},
 		},
 	}
@@ -1202,12 +1198,11 @@ func CreateNodeIngressRule(solrCloud *solr.SolrCloud, nodeName string, domainNam
 	return ingressRule
 }
 
-// TODO: Have this replace the postStart hook for creating the chroot
 func generateZKInteractionInitContainer(solrCloud *solr.SolrCloud, solrCloudStatus *solr.SolrCloudStatus, security *SecurityConfig) (bool, corev1.Container) {
 	allSolrOpts := make([]string, 0)
 
 	// Add all necessary ZK Info
-	envVars, zkSolrOpt, hasChroot := createZkConnectionEnvVars(solrCloud, solrCloudStatus)
+	envVars, zkSolrOpt, _ := createZkConnectionEnvVars(solrCloud, solrCloudStatus)
 	if zkSolrOpt != "" {
 		allSolrOpts = append(allSolrOpts, zkSolrOpt)
 	}
@@ -1225,10 +1220,6 @@ func generateZKInteractionInitContainer(solrCloud *solr.SolrCloud, solrCloudStat
 	}
 
 	cmd := ""
-
-	if hasChroot {
-		cmd += "solr zk ls ${ZK_CHROOT} -z ${ZK_SERVER} || solr zk mkroot ${ZK_CHROOT} -z ${ZK_SERVER}; "
-	}
 
 	if solrCloud.Spec.SolrTLS != nil {
 		cmd += setUrlSchemeClusterPropCmd()

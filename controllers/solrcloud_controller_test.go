@@ -249,6 +249,7 @@ var _ = FDescribe("SolrCloud controller - General", func() {
 			Expect(statefulSet.Spec.Template.Spec.Containers).To(HaveLen(1), "Solr StatefulSet requires a container.")
 			expectedEnvVars := map[string]string{
 				"ZK_HOST":             "host:7271/test",
+				"ZK_CREATE_CHROOT":    "true",
 				"SOLR_HOST":           "$(POD_NAME).foo-solrcloud-headless.default",
 				"SOLR_PORT":           "8983",
 				"SOLR_NODE_PORT":      "8983",
@@ -275,8 +276,7 @@ var _ = FDescribe("SolrCloud controller - General", func() {
 			Expect(statefulSet.Spec.Template.Spec.Containers[0].Lifecycle).To(Equal(testLifecycle), "Incorrect container lifecycle")
 			Expect(statefulSet.Spec.Template.Spec.Containers[0].Resources).To(Equal(testResources), "Incorrect container resources")
 			Expect(statefulSet.Spec.Template.Spec.InitContainers[0].Resources).To(Equal(testResources2), "Incorrect initContainer[0] resources")
-			Expect(statefulSet.Spec.Template.Spec.InitContainers[1].Resources).To(Equal(testResources2), "Incorrect initContainer[1] resources")
-			Expect(statefulSet.Spec.Template.Spec.InitContainers[2].Resources).ToNot(Equal(testResources2), "Incorrect initContainer[2] resources, should not use the default override")
+			Expect(statefulSet.Spec.Template.Spec.InitContainers[1].Resources).ToNot(Equal(testResources2), "Incorrect initContainer[1] resources, should not use the default override")
 			Expect(statefulSet.Spec.Template.Spec.Tolerations).To(Equal(testTolerations), "Incorrect Tolerations for Pod")
 			Expect(statefulSet.Spec.Template.Spec.PriorityClassName).To(Equal(testPriorityClass), "Incorrect Priority class name for Pod Spec")
 			Expect(statefulSet.Spec.Template.Spec.ImagePullSecrets).To(ConsistOf(append(testAdditionalImagePullSecrets, corev1.LocalObjectReference{Name: testImagePullSecretName})), "Incorrect imagePullSecrets")
@@ -341,17 +341,17 @@ var _ = FDescribe("SolrCloud controller - General", func() {
 			Expect(statefulSet.Spec.Template.Spec.Containers).To(HaveLen(1), "Solr StatefulSet requires a container.")
 			expectedZKHost := "host:7271,host2:7271/a-ch/root"
 			expectedEnvVars := map[string]string{
-				"ZK_HOST":   expectedZKHost,
-				"ZK_SERVER": "host:7271,host2:7271",
-				"ZK_CHROOT": "/a-ch/root",
-				"SOLR_HOST": "$(POD_NAME)." + solrCloud.HeadlessServiceName() + "." + solrCloud.Namespace,
-				"SOLR_PORT": "8983",
-				"GC_TUNE":   "",
+				"ZK_HOST":          expectedZKHost,
+				"ZK_SERVER":        "host:7271,host2:7271",
+				"ZK_CHROOT":        "/a-ch/root",
+				"ZK_CREATE_CHROOT": "true",
+				"SOLR_HOST":        "$(POD_NAME)." + solrCloud.HeadlessServiceName() + "." + solrCloud.Namespace,
+				"SOLR_PORT":        "8983",
+				"GC_TUNE":          "",
 			}
 			expectedStatefulSetAnnotations := map[string]string{util.SolrZKConnectionStringAnnotation: expectedZKHost}
 			testPodEnvVariables(expectedEnvVars, statefulSet.Spec.Template.Spec.Containers[0].Env)
 			Expect(statefulSet.Annotations).To(Equal(expectedStatefulSetAnnotations), "Incorrect statefulSet annotations")
-			Expect(statefulSet.Spec.Template.Spec.Containers[0].Lifecycle.PostStart.Exec.Command).To(ConsistOf("sh", "-c", "solr zk ls ${ZK_CHROOT} -z ${ZK_SERVER} || solr zk mkroot ${ZK_CHROOT} -z ${ZK_SERVER}"), "Incorrect post-start command")
 			Expect(statefulSet.Spec.Template.Spec.ServiceAccountName).To(BeEmpty(), "No custom serviceAccountName specified, so the field should be empty.")
 
 			// PodDisruptionBudget creation should be enabled by default

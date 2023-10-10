@@ -4,12 +4,6 @@ This is a list of improvements that can be made to the Solr Operator when it is 
 
 So when upgrading the minimum supported Solr Version for the operator, we can then go ahead and make all improvements that align with versions <= the new minimum supported version.
 
-## 8.x
-
-### 8.11
-
-- SOLR-7642: Solr will create a chroot if necessary using the ZK_CREATE_CHROOT envVar
-
 ## 9.x
 
 ### 9.0
